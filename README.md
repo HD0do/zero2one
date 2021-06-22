@@ -1,2 +1,2 @@
 # bigdata
-This is an exercise code for big data
+This is an exercise code for bigdata
