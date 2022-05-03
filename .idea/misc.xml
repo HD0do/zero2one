@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/comneocrmcanal/pom.xml" />
+        <option value="$PROJECT_DIR$/hiveUdf/pom.xml" />
+        <option value="$PROJECT_DIR$/arithmetic/pom.xml" />
+        <option value="$PROJECT_DIR$/flink_scala/pom.xml" />
+        <option value="$PROJECT_DIR$/flink_java/pom.xml" />
+        <option value="$PROJECT_DIR$/monggo2Hive/pom.xml" />
+        <option value="$PROJECT_DIR$/sparkMongoDB/pom.xml" />
+        <option value="$PROJECT_DIR$/saprkMongoDB/pom.xml" />
+        <option value="$PROJECT_DIR$/hiveUDTF/pom.xml" />
+        <option value="$PROJECT_DIR$/publisher_ck/pom.xml" />
+        <option value="$PROJECT_DIR$/sringtest/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/hiveUdf/test/pom.xml" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
