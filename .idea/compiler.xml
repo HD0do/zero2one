@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="arithmetic" />
+        <module name="comneocrmcanal" />
+        <module name="flink_java" />
+        <module name="flink_scala" />
+        <module name="hiveUDTF" />
+        <module name="java" />
+        <module name="monggo2Hive" />
+        <module name="publisher_ck" />
+        <module name="saprkMongoDB" />
+        <module name="sringtest" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="8">
+      <module name="flink-scala" target="1.8" />
+      <module name="scala" target="1.8" />
+      <module name="sparkMongoDB" target="1.8" />
+      <module name="test" target="1.8" />
+      <module name="test0" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="publisher_ck" options="-parameters" />
+    </option>
+  </component>
+</project>
