@@ -1,4 +1,4 @@
-package com.xiaoshouyi.udtf;
+package com.dida.udtf;
 
 
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
