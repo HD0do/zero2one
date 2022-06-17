@@ -1,0 +1,4 @@
+s3.endpoint: 10.150.60.10
+s3.path.style.access: true
+s3.access-key: admin
+s3.secret-key: ZZTnAcs6gf
