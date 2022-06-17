@@ -1,18 +1,14 @@
 package com.dida.connect.redis;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPObject;
 import com.dida.connect.redis.common.config.FlinkJedisPoolConfig;
 import com.dida.connect.redis.common.mapper.RedisCommand;
 import com.dida.connect.redis.common.mapper.RedisCommandDescription;
 import com.dida.connect.redis.common.mapper.RedisMapper;
-import com.dida.pojo.WaterSensor;
 import com.dida.utils.cdc.series;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
-import kafka.utils.json.JsonObject;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
