@@ -17,7 +17,7 @@
 package com.dida.connect.redis.common.config;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import com.github.yang69.flink.streaming.connectors.redis.common.Util;
+import com.dida.connect.redis.common.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Protocol;

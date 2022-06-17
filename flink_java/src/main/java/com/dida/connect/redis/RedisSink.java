@@ -132,6 +132,7 @@ public class RedisSink<IN> extends RichSinkFunction<IN> {
         String key = redisSinkMapper.getKeyFromData(input);
         int seconds = redisSinkMapper.getSecondsFromData(input);
         String value = redisSinkMapper.getValueFromData(input);
+        String additionalKey = redisSinkMapper.getAdditionalKey(input);
 
         switch (redisCommand) {
             case RPUSH:
@@ -162,7 +163,7 @@ public class RedisSink<IN> extends RichSinkFunction<IN> {
                 this.redisCommandsContainer.zrem(this.additionalKey, key);
                 break;
             case HSET:
-                this.redisCommandsContainer.hset(this.additionalKey, key, value);
+                this.redisCommandsContainer.hset(additionalKey, key, value);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot process such data type: " + redisCommand);
