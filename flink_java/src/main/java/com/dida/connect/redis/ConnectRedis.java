@@ -58,6 +58,7 @@ public class ConnectRedis {
 
         JSONOBj.print();
 
+
         // 连接到Redis的配置
         FlinkJedisPoolConfig redisConfig = new FlinkJedisPoolConfig.Builder()
                 .setHost("10.150.60.5")
