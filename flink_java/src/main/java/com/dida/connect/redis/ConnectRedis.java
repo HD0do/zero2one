@@ -60,7 +60,7 @@ public class ConnectRedis {
 
 
         // 连接到Redis的配置
-        FlinkJedisPoolConfig redisConfig = new FlinkJedisPoolConfig.Builder()
+        FlinkJedisPoolConfig redisConfig = new  FlinkJedisPoolConfig.Builder()
                 .setHost("10.150.60.5")
                 .setPort(30079)
                 .setPassword("bigdata1234")
