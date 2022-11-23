@@ -1,5 +1,7 @@
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * @Author：zhd
@@ -15,6 +17,7 @@ public class onlyOneNum {
         int a = only1Num(nums);
         System.out.println(a);
 
+        //测试算法二
 
 
     }
@@ -33,6 +36,27 @@ public class onlyOneNum {
             System.out.println(num);
         }
         return num;
+    }
+
+    /**
+     *给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，
+     * 并返回它们的数组下标。
+     * @param nums 整数数组
+     * @param target 目标值
+     * @return 返回满足要求的数组值的下表
+     */
+    public static int[] twoNum (int[] nums ,int target){
+        Map map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            map.put(nums[i], i);
+        }
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement) && Integer.parseInt(map.get(complement).toString()) != i) {
+                return new int[] { i, Integer.parseInt(map.get(complement).toString()) };
+            }
+        }
+        throw new IllegalArgumentException("No two sum solution");
     }
 
 
