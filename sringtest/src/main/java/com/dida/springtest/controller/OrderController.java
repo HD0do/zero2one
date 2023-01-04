@@ -32,6 +32,7 @@ public class OrderController {
     public String getGMV(@RequestParam(value = "date",defaultValue = "0") String date) {
         if( "0".equals(date)){
             date = sdf.format(System.currentTimeMillis());
+            System.out.println(date);
         }
         BigDecimal gmv = orderService.getGMV(date);
         String json = "{   \"status\": 0,  \"data\":" + gmv + "}";

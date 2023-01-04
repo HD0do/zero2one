@@ -12,10 +12,8 @@ import java.math.BigDecimal;
 public interface OrderMapper {
 
     //获取商品交易额
-    @Select("select sum(deal_amt) as order_amount from dev_ods.ods_order_db_order_header_ms where date(dt)=#{date}")
+    @Select("select sum(deal_amt) as order_amount from dev_ods.ods_order_db_order_header_ms")
     public BigDecimal getGMV(String date);
-
-
 
 
 

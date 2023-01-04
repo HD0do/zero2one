@@ -21,6 +21,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public BigDecimal getGMV(String date) {
-        return null;
+        return orderMapper.getGMV(date);
     }
 }
