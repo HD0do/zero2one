@@ -9,10 +9,14 @@ import java.math.BigDecimal;
  * @Date: 2022/5/4 11:30
  * @Dscription: 商品金额Mapper映射
  */
-public interface ProductStatsMapper {
+public interface OrderMapper {
 
     //获取商品交易额
-    @Select("select sum(order_amount) order_amount from product_stats_2021 where toYYYYMMDD(stt)=#{date}")
-    public BigDecimal getGMV(int date);
+    @Select("select sum(deal_amt) as order_amount from dev_ods.ods_order_db_order_header_ms where date(dt)=#{date}")
+    public BigDecimal getGMV(String date);
+
+
+
+
 
 }
