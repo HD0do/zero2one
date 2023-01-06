@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dida.springtest.dao.mapper.ext.UserMapperExt">
+
+  <select id="selectCountByOriginSql" resultType="java.lang.Integer">
+    ${sql}
+  </select>
+
+  <!--<select id="selectCountByQuerySql" resultType="java.lang.Integer">-->
+    <!--select count(*) from (-->
+       <!--${sql}-->
+    <!--) tmp-->
+  <!--</select>-->
+
+  <!--<select id="selectListByQuerySql" resultType="com.alibaba.fastjson.JSONObject">-->
+    <!--${sql}-->
+  <!--</select>-->
+
+  <!--<select id="selectOneByQuerySql" resultType="com.alibaba.fastjson.JSONObject">-->
+    <!--${sql}-->
+  <!--</select>-->
+
+  <!--<insert id="executeInsert">-->
+      <!--${sql}-->
+  <!--</insert>-->
+
+  <!--<update id="executeUpdate">-->
+     <!--${sql}-->
+  <!--</update>-->
+
+  <!--<delete id="executeDelete">-->
+     <!--${sql}-->
+  <!--</delete>-->
+</mapper>
