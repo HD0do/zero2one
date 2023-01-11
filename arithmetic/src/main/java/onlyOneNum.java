@@ -59,10 +59,4 @@ public class onlyOneNum {
         throw new IllegalArgumentException("No two sum solution");
     }
 
-
-
-
-
-
-
 }
