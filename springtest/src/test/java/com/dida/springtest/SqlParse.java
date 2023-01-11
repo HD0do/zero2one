@@ -20,6 +20,8 @@ import java.util.List;
 /**
  * @Author：zhd
  * @Date: 2023/1/6 16:22
+ *
+ * 访问者设计模式，AST结点研究、递归遍历、druid
  * @Dscription: 参考：https://blog.csdn.net/cckevincyh/article/details/125317977
  *                  ：https://www.cnblogs.com/zedW/articles/15921991.html
  *                  ：https://gitee.com/haitao/data-lineage-parent/tree/master
