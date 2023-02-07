@@ -1,9 +1,4 @@
-package collect;
-
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.otter.canal.protocol.CanalEntry;
-
-import java.util.List;
+package collectCanal;
 
 public class CanalHandler {
 //    public static void handle(String tableName ,CanalEntry.EventType eventType){
