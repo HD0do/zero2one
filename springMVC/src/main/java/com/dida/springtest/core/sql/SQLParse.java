@@ -8,8 +8,7 @@ import com.alibaba.druid.util.JdbcConstants;
 import java.util.List;
 
 /**
- * @Author：zhd
- * @Date: 2023/1/6 10:55
+ * @Author：zhd * @Date: 2023/1/6 10:55
  * @Dscription:
  */
 public class SQLParse {
@@ -19,9 +18,5 @@ public class SQLParse {
     DbType dbType = JdbcConstants.MYSQL;
 
     List<SQLStatement> statementList = SQLUtils.parseStatements(sql, dbType);
-
-
-
-
 
 }
