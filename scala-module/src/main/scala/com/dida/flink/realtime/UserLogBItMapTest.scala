@@ -1,4 +1,4 @@
-package realtime
+package com.dida.flink.realtime
 
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}

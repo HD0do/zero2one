@@ -1,4 +1,4 @@
-package realtime
+package com.dida.flink.realtime
 
 import java.sql.{Date, PreparedStatement, Timestamp}
 
@@ -6,7 +6,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions.JdbcConnectionOptionsBuilder
 import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcExecutionOptions, JdbcSink, JdbcStatementBuilder}
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.{EnvironmentSettings, Table, TableEnvironment, TableResult}
+import org.apache.flink.table.api.{EnvironmentSettings, Table, TableResult}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
 /**
@@ -36,7 +36,7 @@ object RealTImeOverview {
          |event String,
          |`time` bigint,
          |dt as to_DATE(FROM_UNIXTIME(`time`/1000,'yyyy-MM-dd HH:mm:ss'),'yyyy-MM-dd'),
-         |m as SUBSTRING(FROM_UNIXTIME(`time`/1000,'yyyy-MM-dd HH:mm:ss'),0,16),
+         |dt_m as DATE_FORMAT(to_timeStamp(FROM_UNIXTIME(`time`/1000,'yyyy-MM-dd HH:mm:ss')),'yyyy-MM-dd HH:mm'),
          |h as HOUR(to_timeStamp(FROM_UNIXTIME(`time`/1000,'yyyy-MM-dd HH:mm:ss'))),
          |rowtime as TO_TIMESTAMP(FROM_UNIXTIME(`time`/1000,'yyyy-MM-dd HH:mm:ss')),
          |watermark for rowtime as rowtime - interval '5' second
@@ -54,13 +54,15 @@ object RealTImeOverview {
 
    var orderSql:String =
       s"""
-        |create table order_source_ms(id BIGINT,deal_amt DOUBLE,shop_id STRING,customer_id String,city_id bigint,product_count double,
+        |create table order_source_ms_tmp(id BIGINT,deal_amt DOUBLE,shop_id STRING,customer_id String,city_id bigint,product_count double,
         |order_at timestamp(3),last_updated_at timestamp(3),pay_at timestamp,refund_at timestamp,
-        |tenant_id STRING,order_category STRING,
+        |tenant_id STRING,order_category STRING,customer_type int,
         |h as hour(last_updated_at),
         |pay_hour as hour(pay_at),
-        |refund_hour as hour(refund_at),
-        |m as MINUTE(last_updated_at),
+        |refund_hour as hour(refund_at) ,
+        |pay_m as DATE_FORMAT(pay_at,'yyyy-MM-dd HH:mm'),
+        |order_m as DATE_FORMAT(order_at,'yyyy-MM-dd HH:mm'),
+        |refund_m as DATE_FORMAT(refund_at,'yyyy-MM-dd HH:mm'),
         |dt as to_DATE(cast(last_updated_at as string)),
         |pay_dt as to_DATE(cast(pay_at as string)),
         |refund_dt as to_DATE(cast(refund_at as string)),
@@ -152,6 +154,7 @@ object RealTImeOverview {
         |member_id bigint,
         |tenant_id String,
         |created_at Timestamp,
+        |dt_m as DATE_FORMAT(created_at,'yyyy-MM-dd HH:mm'),
         |dt as to_DATE(cast(created_at as string)),
         |h as hour(created_at),
         |primary key (member_id)not enforced
@@ -195,8 +198,26 @@ object RealTImeOverview {
 
     //TODO kafka_log执行
     val result = tableEnv.executeSql(kafkaLogSql)
+    //测试kafka数据源
+//    tableEnv.sqlQuery("select * from kafka_log_source").execute().print()
     //TODO orderSql执行
     val result1 = tableEnv.executeSql(orderSql)
+    //测试order表数据源
+
+   var test:String =
+     """
+       |create view order_source_ms as
+       |select
+       |id,deal_amt,shop_id,city_id,product_count,order_at,
+       |last_updated_at,pay_at,refund_at,
+       |h,pay_hour,refund_hour,pay_m,refund_m,order_m,dt,pay_dt,refund_dt,
+       |if(customer_type = 1 ,customer_id,concat('-',cast(id as string))) as customer_id
+       | from order_source_ms_tmp
+     """.stripMargin
+
+    tableEnv.executeSql(test)
+    tableEnv.sqlQuery("select * from order_source_ms").execute().print()
+
 
 //    tableEnv.sqlQuery("select * from order_source_ms").execute().print()
     //TODO ck的sink表创建
@@ -236,77 +257,87 @@ object RealTImeOverview {
         |create view view_static_tmp as
         |select
         |properties.shop_id as shop_id,properties.tenantid as tenant_id,
-        |count (distinct distinct_id) as uv,
+        |distinct_id,
         |sum(1) as pv,
-        |0 as pay_pcnt,
+        |'*' as customer_id,
         |0 as pay_amt,
         |0 as pay_qty,
         |0 as pay_cnt,
         |0 as refund_amt,
         |0 as refund_cnt,
         |0 as recruit_qty,
+        |DATE_FORMAT(TO_TIMESTAMP(CAST(dt AS STRING)),'yyyy-MM-dd HH:mm') as dt_m,
         |h,
         |dt
         |from kafka_log_source
         |where (event = 'pageShow' or event = 'detailPageView') and properties.tenantid is not null
-        |group by properties.shop_id ,properties.tenantid,dt,h
+        |group by distinct_id, properties.shop_id ,properties.tenantid,dt,h
       """.stripMargin
 
     tableEnv.executeSql(viewSql)
-//    tableEnv.sqlQuery(viewSql).execute().print()
+    //流量数据测试
+//    tableEnv.sqlQuery("select 1 as asd,* from view_static_tmp").execute().print()
 
     var dealSql:String =
       """
         |create view deal_static_tmp as
         |select
-        |shop_id,tenant_id,
-        |0 as uv,
-        |0 as pv,
-        |sum (pay_pcnt) as pay_pcnt,
+        |shop_id,
+        |tenant_id,
+        |-- 补充流量的访客数据，视图中替换为null
+        |'*' as distinct_id,
+        | 0 as pv,
+        |customer_id ,
         |sum(pay_amt) as pay_amt,
         |sum(pay_qty) as pay_qty,
         |sum(pay_cnt) as pay_cnt,
         |sum(refund_amt) as refund_amt,
         |sum(refund_cnt) as refund_cnt,
-        | sum(recruit_qty) as recruit_qty,
+        |sum(recruit_qty) as recruit_qty,
+        |dt_m,
         |h,
         |dt
         |from
         |(select
-        |shop_id,tenant_id,
-        |count (distinct customer_id) as pay_pcnt,
+        |shop_id,
+        |tenant_id,
+        | customer_id,
         |sum(deal_amt) as pay_amt,
         |sum(product_count) as pay_qty,
         |sum(1) as pay_cnt,
         |0 as refund_amt,
         |0 as refund_cnt,
         |0 as recruit_qty,
+        |pay_m as dt_m,
         |pay_hour as h,
         |pay_dt as dt
         |from order_source_ms
         |where pay_dt = CURRENT_DATE
-        |group by shop_id,tenant_id,pay_dt,pay_hour
+        |group by  customer_id,shop_id,tenant_id,pay_dt,pay_hour,pay_m
         |union all
         |(
         |select
-        |shop_id,tenant_id,
-        |0 as pay_pcnt,
+        |shop_id,
+        |tenant_id,
+        |-- 因为涉及支付人数的去重，所以对需要补充的支付人id 用*表示，视图查询时过滤替换为null
+        |'*' as customer_id,
         |0 as pay_amt,
         |0 as pay_qty,
         |0 as pay_cnt,
         |sum(if (order_category ='reverse', deal_amt,0)) as refund_amt,
         |sum(if (order_category ='reverse', 1,0)) as refund_cnt,
         | 0 as recruit_qty,
+        | DATE_FORMAT(TO_TIMESTAMP(CAST(refund_dt AS STRING)),'yyyy-MM-dd HH:mm') as dt_m,
         |refund_hour as h,
         |refund_dt as dt
         |from order_source_ms
         |where refund_dt = CURRENT_DATE
         |group by shop_id,tenant_id,refund_dt,refund_hour
         |))
-        |group by shop_id,tenant_id,dt,h
+        |group by customer_id,shop_id,tenant_id,dt,h,dt_m
       """.stripMargin
     tableEnv.executeSql(dealSql)
-
+// 交易统计测试
 //    tableEnv.sqlQuery("select * from deal_static_tmp").execute().print()
 
 // todo deal test
@@ -319,33 +350,63 @@ object RealTImeOverview {
       """
         |create view recruit_member_tmp as
         |select
-        |'*'as shop_id,tenant_id,
-        |0 as uv,
+        |'*'as shop_id,
+        |tenant_id,
+        |'*' as distinct_id,
         |0 as pv,
-        |0 as pay_pcnt,
+        |'*' as customer_id,
         |0 as pay_amt,
         |0 as pay_qty,
         |0 as pay_cnt,
         |0 as refund_amt,
         |0 as refund_cnt,
         |count (distinct member_id) recruit_qty,
-        |h,
+        |-- 一天中的数据去重，因为拼接需要补充数据
+        |DATE_FORMAT(TO_TIMESTAMP(CAST(dt AS STRING)),'yyyy-MM-dd HH:mm') as dt_m,
+        |-- 一天中的数据去重，因为拼接需要补充数据
+        |0 as h,
         |dt
         |from member_ms
         |where CURRENT_DATE=dt
-        |group by dt,tenant_id,h
+        |group by dt,tenant_id
       """.stripMargin
     tableEnv.executeSql(recruitMemSQL)
 
     //todo memberTest
-//    tableEnv.sqlQuery(recruitMemSQL).execute().print()
 //  memberTest
-//    tableEnv.sqlQuery("select * from member_ms").execute().print()
+//    tableEnv.sqlQuery("select * from recruit_member_tmp").execute().print()
 
-    //todo union test
-//    tableEnv.executeSql("create view a AS select tenant_id from deal_static_tmp ")
-//    tableEnv.executeSql("create view b AS select tenant_id from view_static_tmp ")
-//    tableEnv.sqlQuery("select * from () tenant_id from a union all b")
+var aaa:String =
+  """
+    |create view a as
+    |select
+    |tenant_id,
+    |shop_id ,
+    |pv,
+    |distinct_id uv,
+    |customer_id as pay_pcnt,
+    |pay_amt,
+    |pay_qty,
+    |pay_cnt,
+    |refund_amt,
+    |refund_cnt,
+    |recruit_qty,
+    |1 as type,
+    |cast (localtimestamp as string) as wirte_time,
+    |to_timestamp(concat(dt_m,':00')) as dt_m,
+    |h,
+    |dt
+    |from
+    | ((select * from deal_static_tmp
+    | union all
+    | select * from view_static_tmp
+    | union all
+    | select * from recruit_member_tmp))
+    |-- group by  distinct_id,customer_id,shop_id,tenant_id,dt,h,dt_m
+  """.stripMargin
+
+    tableEnv.executeSql(test)
+    tableEnv.sqlQuery("select * from a").execute().print()
 
     //todo 商品统计
     //TODO item表和header表关联 insert into product_deal_sink
@@ -369,22 +430,27 @@ object RealTImeOverview {
 
     //todo item join header test
 //    tableEnv.executeSql(itemHeaderJoin)
-    tableEnv.sqlQuery(itemHeaderJoin).execute().print()
+//    tableEnv.sqlQuery(itemHeaderJoin).execute().print()
 
     //todo deal and view data union
     var dealViewSql:String =
       """
-        |select tenant_id,shop_id ,
+        |create view tmp as
+        |select
+        |tenant_id,
+        |shop_id ,
         |sum(pv) as pv,
-        |sum(uv) as uv,
-        |sum(pay_pcnt)as pay_pcnt,
+        |distinct_id uv,
+        |customer_id as pay_pcnt,
         |sum(pay_amt) as pay_amt,
         |sum(pay_qty) as pay_qty,
         |sum(pay_cnt) as pay_cnt,
         |sum(refund_amt) as refund_amt,
         |sum(refund_cnt) as refund_cnt,
         |sum(recruit_qty) as recruit_qty,
+        |1 as type,
         |cast (localtimestamp as string) as wirte_time,
+        |dt_m,
         |h,
         |dt
         | from (
@@ -393,11 +459,15 @@ object RealTImeOverview {
         | select * from view_static_tmp
         | union all
         |select * from recruit_member_tmp )
-        | group by shop_id,tenant_id,dt,h
+        | group by distinct_id,customer_id,shop_id,tenant_id,dt,h,dt_m
       """.stripMargin
 
-//    tableEnv.sqlQuery(dealViewSql).execute().print()
-    val viewDealTable: Table = tableEnv.sqlQuery(dealViewSql)
+    tableEnv.executeSql(dealViewSql)
+
+    tableEnv.sqlQuery("select * from tmp").execute().print()
+
+
+    var viewDealTable: Table = tableEnv.sqlQuery(dealViewSql)
 
     val viewDeal: DataStream[(Boolean, DataStatic)] = tableEnv.toRetractStream[DataStatic](viewDealTable).filter(_._1)
 //   viewDeal.print()
@@ -448,7 +518,7 @@ object RealTImeOverview {
 //    tableEnv.sqlQuery("select sum(if(order_category ='sale', deal_amt,0)),sum(1) from order_source_ms  where pay_at is not null or refund_at is not null ").execute().print()
 //   tableEnv.sqlQuery("select * from ck_test_sink ").execute().print()
 
-    env.execute("realtime")
+    env.execute("com/dida/flink/realtime")
   }
 
 }

@@ -1,4 +1,4 @@
-package utils
+package com.dida.flink.utils
 
 import java.io.{InputStream, InputStreamReader}
 import java.util.Properties
