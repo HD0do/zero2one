@@ -16,6 +16,9 @@ public class CoProcessFun {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        env.setParallelism(1);
+
+
 
 
         env.configure(new ReadableConfig() {
