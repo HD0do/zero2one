@@ -2,7 +2,10 @@ package com.dida.practice.operator.tranceform.processFun;
 
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ReadableConfig;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.co.CoProcessFunction;
+import org.apache.flink.util.Collector;
 
 import java.util.Optional;
 
@@ -19,25 +22,23 @@ public class CoProcessFun {
         env.setParallelism(1);
 
 
+        DataStreamSource<Integer> intDataStream = env.fromElements(1, 2, 3, 4, 5, 6);
 
+        DataStreamSource<String> strdataStream = env.fromElements("a", "b", "c", "d","e");
 
-        env.configure(new ReadableConfig() {
-            @Override
-            public <T> T get(ConfigOption<T> option) {
-                return null;
-            }
+        intDataStream.connect(strdataStream)
+                .process(new CoProcessFunction<Integer, String, String>() {
+                    @Override
+                    public void processElement1(Integer value, Context ctx, Collector<String> out) throws Exception {
+                        out.collect(value.toString());
+                    }
 
-            @Override
-            public <T> Optional<T> getOptional(ConfigOption<T> option) {
-                return Optional.empty();
-            }
-        });
-
-        env.setParallelism(1);
-
-
-//        env.setRestartStrategy();
-
+                    @Override
+                    public void processElement2(String value, Context ctx, Collector<String> out) throws Exception {
+                        out.collect(value + "：我被处理了");
+                    }
+                })
+                .print();
 
 
         env.execute();
