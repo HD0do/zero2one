@@ -15,6 +15,8 @@ import java.util.Optional;
  * @Dscription:
  */
 public class CoProcessFun {
+
+
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -35,7 +37,7 @@ public class CoProcessFun {
 
                     @Override
                     public void processElement2(String value, Context ctx, Collector<String> out) throws Exception {
-                        out.collect(value + "：我被处理了");
+                        out.collect(value + "：我被处理了，嘿嘿");
                     }
                 })
                 .print();
